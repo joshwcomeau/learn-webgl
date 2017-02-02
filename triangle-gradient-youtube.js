@@ -127,8 +127,8 @@ function start() {
   const projMatrix = new Float32Array(16);
 
   mat4.identity(worldMatrix);
-  mat4.identity(viewMatrix);
-  mat4.identity(projMatrix);
+  mat4.lookAt(viewMatrix, [0, 0, -5], [0, 0, 0], [0, 1, 0]);
+  mat4.perspective(projMatrix, glMatrix.toRadian(45), canvas.width/canvas.height, 0.1, 1000);
 
   gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
   gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
@@ -136,10 +136,29 @@ function start() {
 
 
   // Main render loop!
-  gl.drawArrays(
-    // draw type, skip, num to draw
-    gl.TRIANGLES, 0,    3
-  );
+  const identityMatrix = new Float32Array(16);
+  mat4.identity(identityMatrix);
+
+  let angle = 0;
+  const loop = () => {
+    angle = performance.now() / 1000 / 6 * 2 * Math.PI;
+
+    mat4.rotate(worldMatrix, identityMatrix, angle, [1, 1, 1]);
+    gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
+
+    gl.clearColor(0.75, 0.85, 0.8, 1.0);
+    gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+
+    gl.drawArrays(
+      // draw type, skip, num to draw
+      gl.TRIANGLES, 0,    3
+    );
+
+    window.requestAnimationFrame(loop);
+  }
+
+  window.requestAnimationFrame(loop);
+
 }
 
 
